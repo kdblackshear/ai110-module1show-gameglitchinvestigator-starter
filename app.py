@@ -1,72 +1,17 @@
 import random
 import streamlit as st
-
-def get_range_for_difficulty(difficulty: str):
-    if difficulty == "Easy":
-        return 1, 20
-    if difficulty == "Normal":
-        return 1, 100
-    if difficulty == "Hard":
-        return 1, 50
-    return 1, 100
-
-
-def parse_guess(raw: str):
-    if raw is None:
-        return False, None, "Enter a guess."
-
-    if raw == "":
-        return False, None, "Enter a guess."
-
-    try:
-        if "." in raw:
-            value = int(float(raw))
-        else:
-            value = int(raw)
-    except Exception:
-        return False, None, "That is not a number."
-
-    return True, value, None
-
-
-#FIXME: Logic breaks here
-    #FIXED: swapped the logic for high and low and changed conversion method to int() instead of str() for secret
-def check_guess(guess: int, secret: int | str) -> tuple[str, str]:
-    """
-    Compare guess to secret and return (outcome, message).
-
-    outcome options: "Win", "Too High", "Too Low"
-    """
-    secret_int = int(secret)
-
-    if guess == secret_int:
-        return "Win", "🎉 Correct!"
-    if guess > secret_int:
-        return "Too High", "📉 Go LOWER!"
-    return "Too Low", "📈 Go HIGHER!"
-
-
-def update_score(current_score: int, outcome: str, attempt_number: int):
-    if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
-        if points < 10:
-            points = 10
-        return current_score + points
-
-    if outcome == "Too High":
-        if attempt_number % 2 == 0:
-            return current_score + 5
-        return current_score - 5
-
-    if outcome == "Too Low":
-        return current_score - 5
-
-    return current_score
+# FIXED: Moved game logic functions out of app.py and imported from logic_utils
+from logic_utils import (
+    check_guess,
+    get_range_for_difficulty,
+    parse_guess,
+    update_score,
+)
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
 st.title("🎮 Game Glitch Investigator")
-st.caption("An AI-generated guessing game. Something is off.")
+st.caption("An AI-generated guessing game. Refactored and fixed.")
 
 st.sidebar.header("Settings")
 
@@ -91,8 +36,8 @@ st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
-#FIXME: Logic breaks here
-    #FIXED: chaged starting value of attempts to 0 instead of 1 to allow for correct scoring and attempt counting
+# FIXME: Initial attempts set to 1 caused off-by-one errors in attempt limit tracking
+# FIXED: Initialized st.session_state.attempts to 0
 if "attempts" not in st.session_state:
     st.session_state.attempts = 0
 
@@ -106,9 +51,6 @@ if "history" not in st.session_state:
     st.session_state.history = []
 
 st.subheader("Make a guess")
-
-#FIXME: Logic breaks here
-    #FIXED: moved the st.info display block below the if submit: block to allow for correct display of attempts left
 
 with st.expander("Developer Debug Info"):
     st.write("Secret:", st.session_state.secret)
@@ -132,7 +74,11 @@ with col3:
 
 if new_game:
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    # FIXME: new_game previously hardcoded range to (1, 100) instead of difficulty range
+    # FIXED: Replaced hardcoded range with random.randint(low, high)
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.status = "playing"
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 
@@ -154,12 +100,9 @@ if submit:
     else:
         st.session_state.history.append(guess_int)
 
-    
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
-
+        # FIXME: Alternating secret between int and str type broke check_guess comparisons
+        # FIXED: Removed type-toggling logic so secret remains a consistent integer
+        secret = st.session_state.secret
         outcome, message = check_guess(guess_int, secret)
 
         if show_hint:
@@ -186,6 +129,9 @@ if submit:
                     f"The secret was {st.session_state.secret}. "
                     f"Score: {st.session_state.score}"
                 )
+
+# FIXME: st.info displayed before submit block showed stale attempt counts on submit
+# FIXED: Placed st.info after submit handling so UI updates immediately after submission
 st.info(
     f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
