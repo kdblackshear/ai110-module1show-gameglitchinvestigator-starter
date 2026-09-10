@@ -47,6 +47,7 @@ Document at least 3 bugs you found. Add rows as needed.
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
 
+    Streamlit reruns are used to execute a python script from the beginnning each time it is triggered. This means for each rerun, defined variable are automatically reset and start from scratch. Streamlit session state keeps the data that you don't want to change for each rerun to remain intact. These variable do not reset. In conjunction, if the rerun is triggered, the python script starts completely fresh from the top and when a session state value is reached, that value is the smae as it was when the previous rerun completed. 
 ---
 
 ## 5. Looking ahead: your developer habits
