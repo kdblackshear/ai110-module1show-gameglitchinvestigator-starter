@@ -26,18 +26,20 @@ It wrote the code, ran away, and now the game is unplayable.
 ## 📝 Document Your Experience
 
 - [ ] Describe the game's purpose.
+      The game's purpose is to let the user make guesses for a specific number, while, optionally, guiding them with hints to go higher or lower in their guesses. 
 - [ ] Detail which bugs you found.
+      I found bugs in the check_guess logic and the attempt counter logic. The check_guess logic did not work becuase the return values ("Go Higher" and "Go Lower") were swapped, there was an error in the code's logic for text feedback after numeric comparison. The attmept counter did not display the correct number of attempts the user had left. 
 - [ ] Explain what fixes you applied.
-
+      To fix the check_guess logic, I swappped the feedback message and change the numeric conversion method from str() to int() for secret in the function check_guess(). To fix the attempt counter logic, I switched the number the attempts start at from 1 to 0.
 ## 📸 Demo Walkthrough
 
 Describe your fixed game in numbered steps so a reader can follow along without watching a video:
 
-1. <!-- Describe this step -->
-2. <!-- Describe this step -->
-3. <!-- Describe this step -->
-4. <!-- Describe this step -->
-5. <!-- Add more steps as needed -->
+1. User enters a guess of 3.
+2. Game returns "Go Higher".
+3. User enters a guess of 26 → "Go Higher".
+4. Score updates correctly after each guess.
+5. Game ends after the correct guess.
 
 **Screenshot** *(optional)*: <!-- Insert a screenshot of your fixed, winning game here -->
 
